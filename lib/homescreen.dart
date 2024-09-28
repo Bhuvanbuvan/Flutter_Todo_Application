@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:newproject/todo.dart';
 
@@ -11,19 +9,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Todo> todos = [
-    Todo(title: "Good MOrning"),
-    Todo(title: "How Are You"),
-    Todo(title: "What is Your Age?")
-  ];
+  List<Todo> todos = [];
   final TextEditingController et = TextEditingController();
 
   @override
   void dispose() {
-    // TODO: implement dispose
     et.dispose();
     super.dispose();
   }
+
+  int position = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +33,13 @@ class _HomeScreenState extends State<HomeScreen> {
             switch (op) {
               case 1:
                 todos.add(Todo(title: et.text.toString()));
+                et.clear();
+              case 2:
+                todos[position] = Todo(title: et.text.toString());
+              case 3:
+                todos.removeAt(position);
+              case 4:
+                et.clear();
               default:
                 todos.add(Todo(title: "title"));
             }
@@ -106,37 +108,39 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 20,
             ),
             Expanded(
-                child: ListView.builder(
-                    itemCount: todos.length,
-                    itemBuilder: (context, index) {
-                      final todo = todos[index];
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Card(
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                print("object");
-                                et.text = todo.title;
-                              });
-                            },
-                            child: ListTile(
-                              leading: Checkbox(
-                                  value: todo.isDone,
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      todo.isDone = value ?? false;
-                                    });
-                                  }),
-                              title: Text(todos[index].title),
-                              subtitle: Text("data"),
-                              trailing: IconButton(
-                                  onPressed: () {}, icon: Icon(Icons.delete)),
-                            ),
-                          ),
+              child: ListView.builder(
+                itemCount: todos.length,
+                itemBuilder: (context, index) {
+                  final todo = todos[index];
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            et.text = todo.title;
+                            position = index;
+                          });
+                        },
+                        child: ListTile(
+                          leading: Checkbox(
+                              value: todo.isDone,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  todo.isDone = value ?? false;
+                                });
+                              }),
+                          title: Text(todos[index].title),
+                          subtitle: Text("data"),
+                          trailing: IconButton(
+                              onPressed: () {}, icon: Icon(Icons.delete)),
                         ),
-                      );
-                    }))
+                      ),
+                    ),
+                  );
+                },
+              ),
+            )
           ],
         ),
       ),
