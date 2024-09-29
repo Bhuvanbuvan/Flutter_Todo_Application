@@ -67,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text("Please Enter a value"),
         ),
       );
@@ -84,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final border = const OutlineInputBorder(
+    const border = OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(10)),
       borderSide: BorderSide(color: Colors.black, width: 2),
     );
@@ -141,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: TextField(
                 controller: et,
                 onSubmitted: (value) => {print(value)},
-                style: TextStyle(color: Colors.black),
+                style: const TextStyle(color: Colors.black),
                 decoration: InputDecoration(
                   hintText: "Enter Your Job",
                   enabledBorder: border,
@@ -200,9 +200,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 });
                               }),
                           title: Text(todos[index].title),
-                          subtitle: Text("data"),
+                          subtitle: const Text("data"),
                           trailing: IconButton(
-                              onPressed: () {}, icon: Icon(Icons.delete)),
+                              onPressed: () {}, icon: const Icon(Icons.delete)),
                         ),
                       ),
                     ),
