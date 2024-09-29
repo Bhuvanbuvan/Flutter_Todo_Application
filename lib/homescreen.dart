@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:newproject/todo.dart';
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,6 +13,66 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<Todo> todos = [];
   final TextEditingController et = TextEditingController();
+
+  Database? _database;
+
+  @override
+  void initState() {
+    super.initState();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    _database =
+        await openDatabase(join(await getDatabasesPath(), 'task_database_db'),
+            onCreate: (db, version) {
+      return db.execute(
+        "CREATE TABLE task(id INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT)",
+      );
+    }, version: 1);
+
+    _fetchTasks(); // Fetch tasks after initializing the database
+  }
+
+  Future<void> _insert(String title) async {
+    if (_database != null) {
+      final task = Todo(title: title);
+      await _database!.insert('task', task.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace);
+    }
+  }
+
+  // Fetch all tasks from the database
+  Future<void> _fetchTasks() async {
+    if (_database != null) {
+      final List<Map<String, dynamic>> maps = await _database!.query('task');
+
+      setState(() {
+        todos = List.generate(maps.length, (i) {
+          return Todo.fromMap(maps[i]);
+        });
+      });
+    }
+  }
+
+  Future<void> _addTask(BuildContext context) async {
+    final title = et.text;
+    if (title.isNotEmpty) {
+      await _insert(title);
+      _fetchTasks(); // Fetch tasks after inserting a new task
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Task Added $title"),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Please Enter a value"),
+        ),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -26,6 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
       borderRadius: BorderRadius.all(Radius.circular(10)),
       borderSide: BorderSide(color: Colors.black, width: 2),
     );
+
     Widget buttonWidget(int op, {required String text}) {
       return TextButton(
         onPressed: () {
@@ -33,13 +96,19 @@ class _HomeScreenState extends State<HomeScreen> {
             switch (op) {
               case 1:
                 todos.add(Todo(title: et.text.toString()));
+                _addTask(context);
                 et.clear();
+                break;
               case 2:
                 todos[position] = Todo(title: et.text.toString());
+                _fetchTasks();
+                break;
               case 3:
                 todos.removeAt(position);
+                break;
               case 4:
                 et.clear();
+                break;
               default:
                 todos.add(Todo(title: "title"));
             }
@@ -60,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
       home: Scaffold(
         appBar: AppBar(
           title: const Text(
-            "Todo Appliction",
+            "Todo Application",
             style: TextStyle(
                 color: Colors.pink, fontWeight: FontWeight.bold, fontSize: 33),
           ),
